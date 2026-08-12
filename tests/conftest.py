@@ -8,6 +8,9 @@ import copy
 from fastapi.testclient import TestClient
 from src.app import app, activities
 
+# Store the original activities state at module load time
+ORIGINAL_ACTIVITIES = copy.deepcopy(activities)
+
 
 @pytest.fixture
 def client():
@@ -17,29 +20,19 @@ def client():
     return TestClient(app)
 
 
-@pytest.fixture
-def clean_activities():
-    """
-    Provides a deep copy of the original activities dictionary.
-    Ensures each test starts with a clean, known state.
-    Prevents test interdependencies caused by state mutations.
-    """
-    return copy.deepcopy(activities)
-
-
 @pytest.fixture(autouse=True)
-def reset_activities(clean_activities):
+def reset_activities():
     """
     Auto-use fixture that resets the app's activities to clean state before each test.
-    This runs automatically for every test function.
+    This runs automatically for every test function and ensures clean state.
     """
-    # Clear and repopulate activities with clean state
+    # Clear and repopulate activities with original clean state
     activities.clear()
-    activities.update(clean_activities)
+    activities.update(copy.deepcopy(ORIGINAL_ACTIVITIES))
     yield
-    # Cleanup after test (optional, but good practice)
+    # Cleanup after test (ensure clean state for next test)
     activities.clear()
-    activities.update(clean_activities)
+    activities.update(copy.deepcopy(ORIGINAL_ACTIVITIES))
 
 
 # Test constants for reuse across test functions

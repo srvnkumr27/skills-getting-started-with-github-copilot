@@ -54,7 +54,7 @@ class TestGetActivitiesEndpoint:
 class TestSignupEndpoint:
     """Tests for POST /activities/{activity_name}/signup endpoint."""
     
-    def test_signup_success(self, client, clean_activities):
+    def test_signup_success(self, client):
         """Successfully signup a new participant."""
         response = client.post(
             f"/activities/{SAMPLE_ACTIVITY}/signup",
@@ -66,7 +66,7 @@ class TestSignupEndpoint:
         assert SAMPLE_EMAIL in data["message"]
         assert SAMPLE_ACTIVITY in data["message"]
     
-    def test_signup_participant_added_to_list(self, client, clean_activities):
+    def test_signup_participant_added_to_list(self, client):
         """New participant should appear in activities list after signup."""
         # Signup
         client.post(
@@ -80,7 +80,7 @@ class TestSignupEndpoint:
         participants = activities[SAMPLE_ACTIVITY]["participants"]
         assert SAMPLE_EMAIL in participants
     
-    def test_signup_duplicate_fails(self, client, clean_activities):
+    def test_signup_duplicate_fails(self, client):
         """Attempting to signup twice for same activity should fail."""
         # First signup
         client.post(
@@ -109,7 +109,7 @@ class TestSignupEndpoint:
         assert "detail" in data
         assert "not found" in data["detail"].lower()
     
-    def test_signup_participant_count_increases(self, client, clean_activities):
+    def test_signup_participant_count_increases(self, client):
         """Participant count should increase after signup."""
         # Get initial count
         response1 = client.get("/activities")
@@ -127,7 +127,7 @@ class TestSignupEndpoint:
         
         assert new_count == initial_count + 1
     
-    def test_signup_multiple_different_participants(self, client, clean_activities):
+    def test_signup_multiple_different_participants(self, client):
         """Multiple participants can signup for the same activity."""
         # First signup
         response1 = client.post(
@@ -153,7 +153,7 @@ class TestSignupEndpoint:
 class TestRemoveEndpoint:
     """Tests for DELETE /activities/{activity_name}/remove endpoint."""
     
-    def test_remove_success(self, client, clean_activities):
+    def test_remove_success(self, client):
         """Successfully remove a participant from activity."""
         # Setup: signup first
         client.post(
@@ -171,7 +171,7 @@ class TestRemoveEndpoint:
         assert "message" in data
         assert SAMPLE_EMAIL in data["message"]
     
-    def test_remove_participant_removed_from_list(self, client, clean_activities):
+    def test_remove_participant_removed_from_list(self, client):
         """Removed participant should not appear in activities list."""
         # Setup: signup first
         client.post(
@@ -200,7 +200,7 @@ class TestRemoveEndpoint:
         data = response.json()
         assert "detail" in data
     
-    def test_remove_participant_not_found(self, client, clean_activities):
+    def test_remove_participant_not_found(self, client):
         """Remove non-existent participant should return 400."""
         response = client.delete(
             f"/activities/{SAMPLE_ACTIVITY}/remove",
@@ -211,7 +211,7 @@ class TestRemoveEndpoint:
         assert "detail" in data
         assert "not signed up" in data["detail"].lower()
     
-    def test_remove_participant_count_decreases(self, client, clean_activities):
+    def test_remove_participant_count_decreases(self, client):
         """Participant count should decrease after removal."""
         # Setup: signup first
         client.post(
@@ -233,7 +233,7 @@ class TestRemoveEndpoint:
         
         assert count_after_removal == count_after_signup - 1
     
-    def test_remove_then_resignup(self, client, clean_activities):
+    def test_remove_then_resignup(self, client):
         """Should be able to re-signup after removal."""
         # Signup
         client.post(
@@ -263,7 +263,7 @@ class TestRemoveEndpoint:
 class TestCrossEndpointScenarios:
     """Tests for interactions between multiple endpoints."""
     
-    def test_signup_then_get_activities_reflects_change(self, client, clean_activities):
+    def test_signup_then_get_activities_reflects_change(self, client):
         """GET /activities should immediately reflect signup changes."""
         # Signup
         client.post(
@@ -278,7 +278,7 @@ class TestCrossEndpointScenarios:
         # New participant should be visible
         assert SAMPLE_EMAIL in participants
     
-    def test_remove_then_get_activities_reflects_change(self, client, clean_activities):
+    def test_remove_then_get_activities_reflects_change(self, client):
         """GET /activities should immediately reflect removal changes."""
         # Setup: signup first
         client.post(
@@ -299,7 +299,7 @@ class TestCrossEndpointScenarios:
         # Removed participant should not be visible
         assert SAMPLE_EMAIL not in participants
     
-    def test_multiple_activities_signup_independent(self, client, clean_activities):
+    def test_multiple_activities_signup_independent(self, client):
         """Signups for different activities should be independent."""
         chess_email = "chess@mergington.edu"
         gym_email = "gym@mergington.edu"
